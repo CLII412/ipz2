@@ -17,6 +17,12 @@
 Телеграм бот для спрощення процесу пошуку інформації про матчі CS.
 ### 1.2 Реалізація
 
+1. Інтерфейс та функціонал боту (python3):
+* [telebot](https://pypi.org/project/telebot/)
+
+2. Парсинг інформації (python3):
+*  [Selenium](https://selenium-python.readthedocs.io/)
+
 ## 2. Технічне завдання <a name="techtask"></a>
 
 ### 2.1 Загальне завдання
@@ -24,9 +30,15 @@
 Розробити сервіс для відстежування статистики та матчів гри Counter-Strike GO, джерелом інформації виступає https://www.hltv.org/. 
 
 ### 2.2 Функціональність
+ 
+ Бот має 4 основні функції:
+ 1. /live_matches 
+ 2. /future_matches 
+ 3. /my_fauvorite_teams 
+ 4. /append_my_fauvorite_teams  
+ 
 
 
-### 2.3 Документація
 
 
 ## 3. Проектування  <a name="design"></a>
