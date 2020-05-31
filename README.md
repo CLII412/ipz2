@@ -36,6 +36,10 @@
  ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/live_command.jpg?raw=true)
  ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/live_page.jpg?raw=true)
  
+ Статистика гравців обраної команди: 
+ 
+  ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/live_command4.jpg?raw=true)
+ 
  2. /future_matches 
  Список матчів по дням, по київському часу.
  
