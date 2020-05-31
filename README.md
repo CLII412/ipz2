@@ -45,15 +45,18 @@
  
  3. /my_fauvorite_teams 
  
+ Команда для роботи з улюбленими командами.
+ 
  4. /append_my_fauvorite_teams  
  
  ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/append_command.jpg?raw=true)
  
- 
+ Після додавання команди до списку улюблених будуть приходити сповіщення про їхні матчі.
 
 ## 3. Розробка  <a name="development"></a>
 
 ## 4. Використання  <a name="howto"></a> 
+Розгорнути проект можна, створивши токен через Bot Father в Телеграм та запустивши main.py.
 
 ## 5. Висновки  <a name="conclusion"></a> 
 
