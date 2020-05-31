@@ -4,11 +4,9 @@
 
 1. [Вступ](#introduction)
 2. [Технічне завдання](#techtask)
-3. [Проектування](#design)
-4. [Розробка](#development)
-5. [Тестування](#test)
-6. [Використання](#howto)
-7. [Висновки](#conclusion)
+3. [Розробка](#development)
+4. [Використання](#howto)
+5. [Висновки](#conclusion)
 
 
 ##  1. Вступ <a name="introduction"></a>
@@ -37,21 +35,27 @@
  Відображення поточних матчів. Порівнявши зі списком з сайту, бачимо що інформація відображається коректно.
  
  ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/live_command.jpg?raw=true)
-  ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/live_page.jpg?raw=true)
+ ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/live_page.jpg?raw=true)
  
  2. /future_matches 
+ Список матчів по дням, по київському часу.
+ 
+ ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/future.jpg?raw=true)
+ ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/future_page.jpg?raw=true)
+ 
  3. /my_fauvorite_teams 
+ 
  4. /append_my_fauvorite_teams  
  
-## 3. Проектування  <a name="design"></a>
+ ![Альтернативный текст](https://github.com/CLII412/ipz2/blob/master/screenshots/append_command.jpg?raw=true)
+ 
+ 
 
-## 4. Розробка  <a name="development"></a>
+## 3. Розробка  <a name="development"></a>
 
-## 5. Тестування  <a name="test"></a> 
+## 4. Використання  <a name="howto"></a> 
 
-## 6. Використання  <a name="howto"></a> 
-
-## 7. Висновки  <a name="conclusion"></a> 
+## 5. Висновки  <a name="conclusion"></a> 
 
 За допомогою цього проекту покращили навички програмування на python3, а також набули досвіду роботи з такими бібліотеками як Selenium, requests, bs4.
 
