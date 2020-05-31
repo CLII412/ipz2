@@ -1,17 +1,18 @@
-import requests
-from bs4 import BeautifulSoup
-import telebot
-from telebot import types
-from selenium import webdriver
 import datetime
 import os.path
 from time import sleep
 
-token = '933688701:AAFjRQTpUjg4b21VkNmj-ilySkKdLAM8J_E'
+import requests
+import telebot
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from telebot import types
+
+token = '1245925386:AAFCCTqi6scyUsPo3BkyJ4e7YHpaGqs-NgU' # подключение токена
 bot = telebot.TeleBot(token)
 
 
-def get_html(url, proxy=None):
+def get_html(url, proxy=None): #получение юрл страницы
     r = requests.get(url)
     return r.text
 
@@ -19,7 +20,7 @@ def get_html(url, proxy=None):
 # In[2]:
 
 
-@bot.message_handler(commands=["future_matches"])
+@bot.message_handler(commands=["future_matches"])  # раздел с рассписанием матчей
 def future_matches(message):
     h = 'https://www.hltv.org/matches'
     url = get_html(h)
@@ -41,7 +42,7 @@ def future_matches(message):
     bot.send_message(chat_id=message.chat.id, text='Какая дата вас интересует', reply_markup=markup)
 
 
-@bot.message_handler(commands=["live_matches"])
+@bot.message_handler(commands=["live_matches"]) #раздел с лайв матчами
 def live_matches(message):
     try:
         markup = types.InlineKeyboardMarkup(1)
@@ -55,8 +56,8 @@ def live_matches(message):
         for i in soup.find('div', class_='live-matches').find_all('div', class_="live-match"):
             try:
                 teams = i.find_all('span', class_='team-name')
-                team1 = str(teams[0]).split('">')[1].split('<')[0]
-                team2 = str(teams[1]).split('">')[1].split('<')[0]
+                team1 = str(teams[0]).split('">')[1].split('<')[0] #вибор 1 команды
+                team2 = str(teams[1]).split('">')[1].split('<')[0] #вибор 2 команды
                 vs = team1 + " против " + team2
                 markup.add(types.InlineKeyboardButton(text=vs, callback_data=vs))
                 matches.append(vs)
@@ -68,7 +69,7 @@ def live_matches(message):
         bot.send_message(message.chat.id, "На данный момент лайв матчи отсутствуют")
 
 
-@bot.message_handler(commands=["my_fauvorite_teams"])
+@bot.message_handler(commands=["my_fauvorite_teams"]) #раздел с интересующими командами
 def my_fauvorite_teams(message):
     try:
         f = open(str(message.chat.id) + '.txt', 'r')
@@ -78,7 +79,7 @@ def my_fauvorite_teams(message):
         bot.send_message(message.chat.id, 'Ваш список пуст')
 
 
-@bot.message_handler(commands=["append_my_fauvorite_teams"])
+@bot.message_handler(commands=["append_my_fauvorite_teams"])  #раздел с добавлением интересующих команд
 def append_my_fauvorite_teams(message):
     if not os.path.exists(str(message.chat.id) + '.txt'):
         f = open(str(message.chat.id) + '.txt', 'w')
@@ -98,7 +99,7 @@ def append_my_fauvorite_teams(message):
             global team_names
             team_names = []
             team_links = []
-            for i in teams_soup.find_all('td', class_='')[0:5]:
+            for i in teams_soup.find_all('td', class_='')[0:5]:  #поиск команды с таким названием на сайте
                 if i.text not in team_names:
                     team_names.append(i.text)
                     team_links.append(
@@ -107,7 +108,7 @@ def append_my_fauvorite_teams(message):
             for i in team_links:
                 url = get_html(i)
                 soup = BeautifulSoup(url, 'lxml')
-                team_members.append([j.text for j in soup.find_all('span', class_='text-ellipsis bold')])
+                team_members.append([j.text for j in soup.find_all('span', class_='text-ellipsis bold')])  #добавление всех членов команды
             markup = types.InlineKeyboardMarkup(1)
             text = ''
             for i, j in zip(team_names, team_members):
@@ -124,9 +125,9 @@ def append_my_fauvorite_teams(message):
 @bot.callback_query_handler(func=lambda call: True)
 def choose_scene(call):
     global zz
-    zz = call.data
+    zz = call.data   #Глобальная переменная колбекдаты кнопок бот
     try:
-        if zz in team_names:
+        if zz in team_names: #оформление раздела с любимыми командами
             f = open(str(call.message.chat.id) + '.txt', 'a')
             f.write('\n' + zz)
             f.close()
@@ -145,7 +146,7 @@ def choose_scene(call):
     except:
         pass
     try:
-        if zz in matches:
+        if zz in matches: #оформление раздела с выбраным матчем
             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text='Грузим...')
             global driver
             try:
@@ -170,7 +171,7 @@ def choose_scene(call):
         pass
 
     try:
-        h = 'https://www.hltv.org/matches'
+        h = 'https://www.hltv.org/matches' #получение информации о предстоящих матчах
         url = get_html(h)
         soup = BeautifulSoup(url, 'lxml')
         days = []
@@ -203,7 +204,7 @@ def choose_scene(call):
                 prev_stat_text = stat_text
     except:
         pass
-    if zz == "1":
+    if zz == "1": #оформление раздела с информацией о выбраном матче->пики баны
         try:
             prev_map_text = ''
             markup = types.InlineKeyboardMarkup(1)
@@ -213,11 +214,11 @@ def choose_scene(call):
             button5 = types.InlineKeyboardButton(text="Выйти", callback_data="5")
             markup.add(button2, button3, button4, button5)
 
-            maps = '\n'.join(driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[3]/div[1]/div[1]/div').text.replace('\n', '').split(
-                '*'))
-            picks = driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[3]/div[1]/div[2]/div').text
+            maps = '\n'.join( #получение информации о матче с сайта
+                driver.find_element_by_class_name('maps').find_element_by_class_name('standard-box').text.replace('\n',
+                                                                                                                  '').split(
+                    '*'))
+            picks = driver.find_element_by_class_name('maps').find_elements_by_class_name('standard-box')[1].text
             map_text = maps + '\n' + picks + '\n'
             for i in (driver.find_elements_by_class_name('mapholder')):
                 map_info = i.text.replace('\n', ' ').split(' ', 1)
@@ -234,12 +235,10 @@ def choose_scene(call):
                     time_two = datetime.datetime.now().timestamp()
                     if time_two - time_one > 3:
                         time_one = time_two
-                        maps = '\n'.join(driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[3]/div[1]/div[1]/div').text.replace('\n',
-                                                                                                                '').split(
-                            '*'))
-                        picks = driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[3]/div[1]/div[2]/div').text
+                        maps = '\n'.join(driver.find_element_by_class_name('maps').find_element_by_class_name(
+                            'standard-box').text.replace('\n', '').split('*'))
+                        picks = driver.find_element_by_class_name('maps').find_elements_by_class_name('standard-box')[
+                            1].text
                         map_text = maps + '\n' + picks + '\n'
                         for i in (driver.find_elements_by_class_name('mapholder')):
                             map_info = i.text.replace('\n', ' ').split(' ', 1)
@@ -248,11 +247,11 @@ def choose_scene(call):
                         if map_text != prev_map_text:
                             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                                                   text=map_text, reply_markup=markup)
-                            # bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=map_text, reply_markup=markup)
+
                             prev_map_text = map_text
                 except:
                     break
-        except:
+        except: #оформление раздела с информацией о матче в случае если произошла ошибка и бот не смог отобразить какуето информацию
             markup = types.InlineKeyboardMarkup(1)
             button1 = types.InlineKeyboardButton(text="Пики-баны", callback_data="1")
             button2 = types.InlineKeyboardButton(text="Информация о текущей карте", callback_data="2")
@@ -263,7 +262,7 @@ def choose_scene(call):
             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                                   text='Не получилось узнать информацию\n\nЧто хотите узнать', reply_markup=markup)
     elif zz == "2":
-        try:
+        try: #оформление раздела с информацией о выбраном матче->Информация о текущей карте
             prev_text = ''
             markup = types.InlineKeyboardMarkup(1)
             button1 = types.InlineKeyboardButton(text="Пики-баны", callback_data="1")
@@ -274,31 +273,24 @@ def choose_scene(call):
             time_one = datetime.datetime.now().timestamp()
             time_three = time_one
 
+            round_line = driver.find_element_by_class_name('topbarBg').text.split('\n')#получение информации о матче с сайта
             teams = driver.find_element_by_class_name('content').find_elements_by_class_name('teamName')
             first_team = teams[0].text
             second_team = teams[1].text
-
-            raund = driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[1]/span').text
-            ct_score = driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[1]').text
-            t_score = driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[3]').text
-            time = driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[1]/span').text
-            is_bomb = driver.find_element_by_xpath(
-                '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
+            is_bomb = driver.find_element_by_xpath( #информация о наличии установленой бомбы
+                '/html/body/div[3]/div/div[2]/div[1]/div[2]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
                 'src').split('/')[-1]
             if is_bomb == 'bomb.png':
-                bomb = ''
+                bomb = ' '
             else:
-                bomb = 'бомба'
+                bomb = ' бомба '
 
-            first_line = raund + ' ' + ct_score + ':' + t_score + ' ' + time + ' ' + bomb
+            first_line = round_line[0] + bomb + round_line[4] + '\n' + first_team + ': ' + round_line[
+                1] + '\n' + second_team + ': ' + round_line[3]
 
             raund_results = driver.find_elements_by_class_name('historyIcon')
 
-            match_l = []
+            match_l = [] #информация о том как закончился раунд и отображение соответвующей иконки
             for i in raund_results[0:15]:
                 j = str(i.find_element_by_tag_name('img').get_attribute('src'))
                 if j == 'https://static.hltv.org/images/scoreboard2/emptyHistory.svg':
@@ -350,7 +342,7 @@ def choose_scene(call):
                 match_r.append(elem)
 
             line = ''
-            for i, j in zip(match_l, match_r):
+            for i, j in zip(match_l, match_r): #оформдение информации о том как закончился раунд и отображение соответвующей иконки в нужном месте
                 line = line + '\n' + 'ᅠ' * (len(first_team) - 4) + i + 'ᅠ|ᅠ' + j
 
             second_line = 'ᅠ' + first_team + 'ᅠᅠ|ᅠᅠ' + second_team + line
@@ -366,27 +358,20 @@ def choose_scene(call):
                     time_three = datetime.datetime.now().timestamp()
                     if time_three - time_one > 1:
                         time_one = time_three
+                        round_line = driver.find_element_by_class_name('topbarBg').text.split('\n')
                         teams = driver.find_element_by_class_name('content').find_elements_by_class_name('teamName')
                         first_team = teams[0].text
                         second_team = teams[1].text
-
-                        raund = driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[1]/span').text
-                        ct_score = driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[1]').text
-                        t_score = driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[3]').text
-                        time = driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[1]/span').text
                         is_bomb = driver.find_element_by_xpath(
-                            '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
+                            '/html/body/div[3]/div/div[2]/div[1]/div[2]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
                             'src').split('/')[-1]
                         if is_bomb == 'bomb.png':
-                            bomb = ''
+                            bomb = ' '
                         else:
-                            bomb = 'бомба'
+                            bomb = ' бомба '
 
-                        first_line = raund + ' ' + ct_score + ':' + t_score + ' ' + time + ' ' + bomb
+                        first_line = round_line[0] + bomb + round_line[4] + '\n' + first_team + ': ' + round_line[
+                            1] + '\n' + second_team + ': ' + round_line[3]
 
                         raund_results = driver.find_elements_by_class_name('historyIcon')
 
@@ -459,7 +444,7 @@ def choose_scene(call):
                 except:
                     break
 
-        except:
+        except:  #оформление раздела с информацией о матче в случае если произошла ошибка и бот не смог отобразить какуето информацию
             markup = types.InlineKeyboardMarkup(1)
             button1 = types.InlineKeyboardButton(text="Пики-баны", callback_data="1")
             button2 = types.InlineKeyboardButton(text="Информация о текущей карте", callback_data="2")
@@ -470,7 +455,7 @@ def choose_scene(call):
             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                                   text='Не получилось узнать информацию\n\nЧто хотите узнать', reply_markup=markup)
 
-    elif zz[0] == "3":
+    elif zz[0] == "3":  #информация об игроках и их статистике,наличие брони,бомбы ,здоровья...,для первой команды
         prev_stat_text = ''
         try:
 
@@ -485,22 +470,18 @@ def choose_scene(call):
                 button4 = types.InlineKeyboardButton(text='Назад', callback_data="0")
                 markup.add(button3, button4)
 
-                raund = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[1]/span').text
-                ct_score = first_team + ' ' + driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[1]').text
-                t_score = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[3]').text + ' ' + second_team
-                time = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[1]/span').text
+                round_line = driver.find_element_by_class_name('topbarBg').text.split('\n')
                 is_bomb = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
+                    '/html/body/div[3]/div/div[2]/div[1]/div[2]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
                     'src').split('/')[-1]
                 if is_bomb == 'bomb.png':
-                    bomb = ''
+                    bomb = ' '
                 else:
-                    bomb = 'бомба'
-                first_line = raund + ' ' + ct_score + ':' + t_score + ' ' + time + ' ' + bomb
+                    bomb = ' бомба '
+
+                first_line = round_line[0] + bomb + round_line[4] + '\n' + first_team + ': ' + round_line[
+                    1] + '\n' + second_team + ': ' + round_line[3]
+
                 stat_text = first_line + '\n\nScoreboard'
                 i = driver.find_element_by_class_name('content').find_elements_by_class_name("team")[0]
                 stat_text += '\n' + \
@@ -614,7 +595,7 @@ def choose_scene(call):
 
 
 
-            elif zz[1] == '2':
+            elif zz[1] == '2':#информация об игроках и их статистике,наличие брони,бомбы ,здоровья...,для второй команды
 
                 teams = driver.find_element_by_class_name('content').find_elements_by_class_name('teamName')
                 first_team = teams[0].text
@@ -625,22 +606,18 @@ def choose_scene(call):
                 button4 = types.InlineKeyboardButton(text='Назад', callback_data="0")
                 markup.add(button2, button4)
 
-                raund = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[1]/span').text
-                ct_score = first_team + ' ' + driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[1]').text
-                t_score = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[3]').text + ' ' + second_team
-                time = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[1]/span').text
+                round_line = driver.find_element_by_class_name('topbarBg').text.split('\n')
                 is_bomb = driver.find_element_by_xpath(
-                    '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
+                    '/html/body/div[3]/div/div[2]/div[1]/div[2]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
                     'src').split('/')[-1]
                 if is_bomb == 'bomb.png':
-                    bomb = ''
+                    bomb = ' '
                 else:
-                    bomb = 'бомба'
-                first_line = raund + ' ' + ct_score + ':' + t_score + ' ' + time + ' ' + bomb
+                    bomb = ' бомба '
+
+                first_line = round_line[0] + bomb + round_line[4] + '\n' + first_team + ': ' + round_line[
+                    1] + '\n' + second_team + ': ' + round_line[3]
+
                 stat_text = first_line + '\n\nScoreboard'
                 i = driver.find_element_by_class_name('content').find_elements_by_class_name("team")[1]
                 stat_text += '\n' + \
@@ -686,25 +663,21 @@ def choose_scene(call):
 
                 while zz[0] == '3' and zz[1] == '2':
 
+                    round_line = driver.find_element_by_class_name('topbarBg').text.split('\n')
                     teams = driver.find_element_by_class_name('content').find_elements_by_class_name('teamName')
                     first_team = teams[0].text
                     second_team = teams[1].text
-                    raund = driver.find_element_by_xpath(
-                        '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[1]/span').text
-                    ct_score = first_team + ' ' + driver.find_element_by_xpath(
-                        '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[1]').text
-                    t_score = driver.find_element_by_xpath(
-                        '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[2]/div[3]').text + ' ' + second_team
-                    time = driver.find_element_by_xpath(
-                        '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[1]/span').text
                     is_bomb = driver.find_element_by_xpath(
-                        '/html/body/div[3]/div/div[2]/div[1]/div[1]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
+                        '/html/body/div[3]/div/div[2]/div[1]/div[2]/div[6]/div/div[1]/div[2]/div/div[1]/div[3]/div[2]/img').get_attribute(
                         'src').split('/')[-1]
                     if is_bomb == 'bomb.png':
-                        bomb = ''
+                        bomb = ' '
                     else:
-                        bomb = 'бомба'
-                    first_line = raund + ' ' + ct_score + ':' + t_score + ' ' + time + ' ' + bomb
+                        bomb = ' бомба '
+
+                    first_line = round_line[0] + bomb + round_line[4] + '\n' + first_team + ': ' + round_line[
+                        1] + '\n' + second_team + ': ' + round_line[3]
+
                     stat_text = first_line + '\n\nScoreboard'
                     i = driver.find_element_by_class_name('content').find_elements_by_class_name("team")[0]
                     stat_text += '\n' + \
@@ -766,7 +739,7 @@ def choose_scene(call):
                                       reply_markup=markup)
                 prev_stat_text = stat_text
 
-    elif zz == "4":
+    elif zz == "4": #раздел с письменной статистикой
         markup = types.InlineKeyboardMarkup(1)
         button1 = types.InlineKeyboardButton(text="Пики-баны", callback_data="1")
         button2 = types.InlineKeyboardButton(text="Информация о текущей карте", callback_data="2")
@@ -845,7 +818,7 @@ def choose_scene(call):
                     log_prev = main_line
             except:
                 pass
-
+    #отображение главного меню
     elif zz == "0":
         markup = types.InlineKeyboardMarkup(1)
         button1 = types.InlineKeyboardButton(text="Пики-баны", callback_data="1")
@@ -858,14 +831,14 @@ def choose_scene(call):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                               text='Что хотите узнать', reply_markup=markup)
 
-    elif zz == "5":
+    elif zz == "5": #кнопка выхода
         try:
             driver.quit()
         except:
             pass
         bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
 
-    elif zz == "89":
+    elif zz == "89": #выбор даты для просмотра матчей
 
         h = 'https://www.hltv.org/matches'
         url = get_html(h)
